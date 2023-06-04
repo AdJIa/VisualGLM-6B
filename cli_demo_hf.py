@@ -4,8 +4,8 @@ import signal
 from transformers import AutoTokenizer, AutoModel
 import torch
 
-tokenizer = AutoTokenizer.from_pretrained("THUDM/visualglm-6b", trust_remote_code=True)
-model = AutoModel.from_pretrained("THUDM/visualglm-6b", trust_remote_code=True).half().cuda()
+tokenizer = AutoTokenizer.from_pretrained("/root/data/visualglm-6b-model", trust_remote_code=True)
+model = AutoModel.from_pretrained("/root/data/visualglm-6b-model", trust_remote_code=True).half().cuda()
 model = model.eval()
 
 os_name = platform.system()
