@@ -3,7 +3,7 @@ import torch
 import argparse
 
 from sat import mpu, get_args, get_tokenizer
-from sat.training.deepspeed_training import training_main
+# from sat.training.deepspeed_training import training_main
 from model import VisualGLMModel
 from sat.model.finetune import PTuningV2Mixin
 from lora_mixin import LoraMixin
@@ -162,34 +162,34 @@ def create_dataset_function(path, args):
     return dataset
 
 
-if __name__ == '__main__':
-    py_parser = argparse.ArgumentParser(add_help=False)
-    py_parser.add_argument('--max_source_length', type=int)
-    py_parser.add_argument('--max_target_length', type=int)
-    py_parser.add_argument('--ignore_pad_token_for_loss', type=bool, default=True)
-    # py_parser.add_argument('--old_checkpoint', action="store_true")
-    py_parser.add_argument('--source_prefix', type=str, default="")
-    py_parser = FineTuneVisualGLMModel.add_model_specific_args(py_parser)
-    known, args_list = py_parser.parse_known_args()
-    args = get_args(args_list)
-    args = argparse.Namespace(**vars(args), **vars(known))
-    args.device = 'cpu'
-
-    model_type = 'visualglm-6b'
-    model, args = FineTuneVisualGLMModel.from_pretrained(model_type, args)
-    if torch.cuda.is_available():
-        model = model.to('cuda')
-    tokenizer = get_tokenizer(args)
-    label_pad_token_id = -100 if args.ignore_pad_token_for_loss else tokenizer.pad_token_id
-    def data_collator(examples):
-        for example in examples:
-            example['input_ids'] = torch.tensor(example['input_ids'], dtype=torch.long)
-            example['labels'] = torch.tensor(example['labels'], dtype=torch.long)
-        ret = {
-            'input_ids': torch.stack([example['input_ids'] for example in examples]),
-            'labels': torch.stack([example['labels'] for example in examples]),
-            'image': torch.stack([example['image'] for example in examples]),
-            'pre_image': example['pre_image']
-        }
-        return ret
-    training_main(args, model_cls=model, forward_step_function=forward_step, create_dataset_function=create_dataset_function, collate_fn=data_collator)
+# if __name__ == '__main__':
+#     py_parser = argparse.ArgumentParser(add_help=False)
+#     py_parser.add_argument('--max_source_length', type=int)
+#     py_parser.add_argument('--max_target_length', type=int)
+#     py_parser.add_argument('--ignore_pad_token_for_loss', type=bool, default=True)
+#     # py_parser.add_argument('--old_checkpoint', action="store_true")
+#     py_parser.add_argument('--source_prefix', type=str, default="")
+#     py_parser = FineTuneVisualGLMModel.add_model_specific_args(py_parser)
+#     known, args_list = py_parser.parse_known_args()
+#     args = get_args(args_list)
+#     args = argparse.Namespace(**vars(args), **vars(known))
+#     args.device = 'cpu'
+#
+#     model_type = 'visualglm-6b'
+#     model, args = FineTuneVisualGLMModel.from_pretrained(model_type, args)
+#     if torch.cuda.is_available():
+#         model = model.to('cuda')
+#     tokenizer = get_tokenizer(args)
+#     label_pad_token_id = -100 if args.ignore_pad_token_for_loss else tokenizer.pad_token_id
+#     def data_collator(examples):
+#         for example in examples:
+#             example['input_ids'] = torch.tensor(example['input_ids'], dtype=torch.long)
+#             example['labels'] = torch.tensor(example['labels'], dtype=torch.long)
+#         ret = {
+#             'input_ids': torch.stack([example['input_ids'] for example in examples]),
+#             'labels': torch.stack([example['labels'] for example in examples]),
+#             'image': torch.stack([example['image'] for example in examples]),
+#             'pre_image': example['pre_image']
+#         }
+#         return ret
+#     training_main(args, model_cls=model, forward_step_function=forward_step, create_dataset_function=create_dataset_function, collate_fn=data_collator)
